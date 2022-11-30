@@ -101,15 +101,18 @@ func NewWaitGroup() *waitGroup {
 func (wg *waitGroup) Add(f func()) *waitGroup {
 	wg.processTotal++
 	wg.swg.Add(1)
-	p := New(func() {
+	New(func() {
 		defer func() {
 			wg.swg.Done()
 			wg.processCount++
 			wg.onProcessHandle((float32(wg.processCount) / float32(wg.processTotal)) * 100)
 		}()
 		f()
+	}).Catch(func(i interface{}) {
+		if wg.exception != nil {
+			wg.exception(i)
+		}
 	})
-	p.exception = wg.exception
 	return wg
 }
 

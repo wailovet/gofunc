@@ -3,23 +3,22 @@ package gofunc
 import "github.com/gammazero/workerpool"
 
 type Pool struct {
-	wp     *workerpool.WorkerPool
-	doFunc func(in interface{})
+	wp *workerpool.WorkerPool
 }
 
-func NewPool(t int, doFunc func(in interface{})) (pool *Pool) {
+func NewPool(t int) (pool *Pool) {
 	pool = &Pool{}
 	pool.wp = workerpool.New(t)
-	pool.doFunc = doFunc
 	return pool
 }
 
-func (pool *Pool) Do(in interface{}) {
+func (pool *Pool) Do(doFunc func(in interface{}), in interface{}) {
 	pool.wp.Submit(func() {
-		pool.doFunc(in)
+		doFunc(in)
 	})
 }
 
 func (pool *Pool) Wait() {
 	pool.wp.StopWait()
+	pool.wp = workerpool.New(pool.wp.Size())
 }

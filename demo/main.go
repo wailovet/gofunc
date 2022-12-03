@@ -8,26 +8,26 @@ import (
 )
 
 func main() {
-	threadNum := 10
-	gofunc.DefaultCatch = func(i interface{}) {
+	pool := gofunc.NewPool(2)
+	for i := 0; i < 20; i++ {
 
-		log.Println("DefaultCatch")
+		pool.Do(func(in interface{}) {
+
+			log.Println(in)
+		}, i)
 	}
-	group := gofunc.NewWaitGroup()
-	group.Catch(func(err interface{}) {
-		panic(err)
-	})
-	for ti := 0; ti < threadNum; ti++ {
-		func(index int) {
-			group.Add(func() {
-				time.Sleep(time.Second)
-				panic("123")
-			}).Catch(func(i interface{}) {
-				panic("Catch")
-				log.Fatalln("Catch")
-			})
-		}(ti)
+
+	pool.Wait()
+
+	log.Println("--------------------------------------------")
+	time.Sleep(time.Second)
+
+	for i := 30; i < 50; i++ {
+		pool.Do(func(in interface{}) {
+
+			log.Println(in)
+		}, i)
 	}
-	group.Wait()
-	log.Println("OK")
+
+	pool.Wait()
 }

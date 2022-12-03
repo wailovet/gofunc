@@ -38,7 +38,7 @@ func Loop(f func(i uint64) bool) *goFuncLoop {
 	}
 	go func() {
 		defer func() {
-			defer func() { recover() }()
+			// defer func() { recover() }()
 
 			if e := recover(); e != nil {
 				if gfl.gf.exception != nil {
@@ -105,7 +105,9 @@ func (wg *waitGroup) Add(f func()) *waitGroup {
 		defer func() {
 			wg.swg.Done()
 			wg.processCount++
-			wg.onProcessHandle((float32(wg.processCount) / float32(wg.processTotal)) * 100)
+			if wg.onProcessHandle != nil {
+				wg.onProcessHandle((float32(wg.processCount) / float32(wg.processTotal)) * 100)
+			}
 		}()
 		f()
 	}).Catch(func(i interface{}) {
